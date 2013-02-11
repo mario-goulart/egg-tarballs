@@ -68,8 +68,8 @@
 
 (define (usage #!optional exit-code)
   (let ((port (if (and exit-code (not (zero? exit-code)))
-                  (current-output-port)
-                  (current-error-port))))
+                  (current-error-port)
+                  (current-output-port))))
     (fprintf port "Usage: ~a [-verbose] <henrietta cache dir> <tarballs dir>\n"
              (pathname-strip-directory (program-name))))
   (when exit-code (exit exit-code)))
