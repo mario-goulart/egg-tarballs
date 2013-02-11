@@ -1,0 +1,7 @@
+;; -*- scheme -*-
+
+((synopsis "Creates tarballs for eggs in henrietta cache")
+ (author "Mario Domenech Goulart")
+ (category tools)
+ (license "BSD")
+ (depends simple-sha1))

@@ -1,0 +1,7 @@
+;; -*- scheme -*-
+(compile -O3 -d0 egg-tarballs.scm)
+
+(install-program
+ 'egg-tarballs
+ '("egg-tarballs")
+ '((version "0.1")))
