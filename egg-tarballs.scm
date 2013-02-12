@@ -19,8 +19,8 @@
 
 (define-syntax run
   (syntax-rules ()
-    ((_ expr)
-     (let ((cmd (concat `expr)))
+    ((_ . exprs)
+     (let ((cmd (concat `exprs)))
        (when *verbose*
          (print cmd))
        (system* cmd)))))
@@ -39,16 +39,16 @@
         (begin
           (printf "Creating tarball for ~a\n" egg-version-tarball-dir)
           (create-directory  egg-tarball-dir 'with-parents)
-          (run (,cp ,cp-options
-                    ,egg-version-dir
-                    ,(make-pathname egg-tarball-dir egg-version-tarball-dir)))
+          (run ,cp ,cp-options
+               ,egg-version-dir
+               ,(make-pathname egg-tarball-dir egg-version-tarball-dir))
           (change-directory egg-tarball-dir)
-          (run (,tar ,tar-options ,tar-file ,egg-version-tarball-dir))
-          (run (,gzip ,gzip-options ,tar-file))
+          (run ,tar ,tar-options ,tar-file ,egg-version-tarball-dir)
+          (run ,gzip ,gzip-options ,tar-file)
           (with-output-to-file sum-file
             (lambda ()
               (print (sha1sum gzip-file))))
-          (run (,rm ,rm-options ,tar-file ,egg-version-tarball-dir))))))
+          (run ,rm ,rm-options ,tar-file ,egg-version-tarball-dir)))))
 
 (define (create-tarballs henrietta-cache-dir tarballs-dir)
   (create-directory tarballs-dir 'with-parents)
