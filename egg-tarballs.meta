@@ -4,4 +4,5 @@
  (author "Mario Domenech Goulart")
  (category tools)
  (license "BSD")
- (depends simple-sha1))
+ (depends simple-sha1)
+ (test-depends test))
