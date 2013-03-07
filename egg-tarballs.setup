@@ -4,4 +4,4 @@
 (install-program
  'egg-tarballs
  '("egg-tarballs")
- '((version "0.2")))
+ '((version "0.3")))
