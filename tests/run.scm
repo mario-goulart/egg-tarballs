@@ -1,10 +1,7 @@
 (use test setup-api posix files utils)
 
-(define egg-tarballs
-  (make-pathname (list chicken-prefix "bin") "egg-tarballs"))
-
 (system* "rm -rf tarballs")
-(system* (sprintf "~a henrietta-cache tarballs" egg-tarballs))
+(system* "egg-tarballs henrietta-cache tarballs")
 
 (test-begin "egg-tarballs")
 
