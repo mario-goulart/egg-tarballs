@@ -15,3 +15,5 @@
       (with-input-from-file "tarballs/foo/foo-1.0.tar.gz.sha1" read-line))
 
 (test-end "egg-tarballs")
+
+(test-exit)
