@@ -1,7 +1,14 @@
 (use test setup-api posix files utils simple-sha1)
 
+(define egg-tarballs
+  (make-pathname
+   (if (get-environment-variable "SALMONELLA_RUNNING")
+       #f
+       (program-path))
+   "egg-tarballs"))
+
 (system* "rm -rf tarballs")
-(system* "egg-tarballs henrietta-cache tarballs")
+(system* (sprintf "~a henrietta-cache tarballs" egg-tarballs))
 
 (test-begin "egg-tarballs")
 
