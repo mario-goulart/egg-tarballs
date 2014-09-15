@@ -55,7 +55,7 @@
   (for-each
    (lambda (egg-dir)
      (let ((egg-name (pathname-strip-directory egg-dir))
-           (versions (glob (make-pathname (list egg-dir "tags") "*"))))
+           (versions (glob (make-pathname egg-dir "*"))))
        (for-each (lambda (egg-version-dir)
                    (create-egg-tarball egg-name egg-version-dir tarballs-dir))
                  versions)))
