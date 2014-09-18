@@ -54,8 +54,15 @@
   (create-directory tarballs-dir 'with-parents)
   (for-each
    (lambda (egg-dir)
-     (let ((egg-name (pathname-strip-directory egg-dir))
-           (versions (glob (make-pathname egg-dir "*"))))
+     (let* ((egg-name (pathname-strip-directory egg-dir))
+            (tags-dir (make-pathname egg-dir "tags"))
+            ;; henrietta-cache 1.0.0 changed the cache format.  Here
+            ;; we try to cope with both cache formats (with or without
+            ;; the "tags" directory)
+            (versions-dir (if (directory-exists? tags-dir)
+                              tags-dir
+                              egg-dir))
+            (versions (glob (make-pathname versions-dir "*"))))
        (for-each (lambda (egg-version-dir)
                    (create-egg-tarball egg-name egg-version-dir tarballs-dir))
                  versions)))
