@@ -3,6 +3,8 @@
 (import chicken scheme)
 (use files posix data-structures utils srfi-1 srfi-13 simple-sha1 extras)
 
+(include "egg-tarballs-version.scm")
+
 (define tar "tar")
 (define tar-options "cf")
 (define gzip "gzip")
@@ -50,19 +52,21 @@
               (print (sha1sum gzip-file))))
           (run ,rm ,rm-options ,tar-file ,egg-version-tarball-dir)))))
 
+(define (egg-versions-dir egg-dir)
+  (let ((tags-dir (make-pathname egg-dir "tags")))
+    ;; henrietta-cache 1.0.0 changed the cache format.  Here we try to
+    ;; cope with both cache formats (with or without the "tags"
+    ;; directory)
+    (if (directory-exists? tags-dir)
+        tags-dir
+        egg-dir)))
+
 (define (create-tarballs henrietta-cache-dir tarballs-dir)
   (create-directory tarballs-dir 'with-parents)
   (for-each
    (lambda (egg-dir)
      (let* ((egg-name (pathname-strip-directory egg-dir))
-            (tags-dir (make-pathname egg-dir "tags"))
-            ;; henrietta-cache 1.0.0 changed the cache format.  Here
-            ;; we try to cope with both cache formats (with or without
-            ;; the "tags" directory)
-            (versions-dir (if (directory-exists? tags-dir)
-                              tags-dir
-                              egg-dir))
-            (versions (glob (make-pathname versions-dir "*"))))
+            (versions (glob (make-pathname (egg-versions-dir egg-dir) "*"))))
        (for-each (lambda (egg-version-dir)
                    (create-egg-tarball egg-name egg-version-dir tarballs-dir))
                  versions)))
@@ -77,7 +81,7 @@
   (let ((port (if (and exit-code (not (zero? exit-code)))
                   (current-error-port)
                   (current-output-port))))
-    (fprintf port "Usage: ~a [-verbose] <henrietta cache dir> <tarballs dir>\n"
+    (fprintf port "Usage: ~a [-verbose] [-version] <henrietta cache dir> <tarballs dir>\n"
              (pathname-strip-directory (program-name))))
   (when exit-code (exit exit-code)))
 
@@ -93,6 +97,9 @@
     (usage 1))
   (when (member "-verbose" args)
     (set! *verbose* #t))
+  (when (member "-version" args)
+    (print egg-tarballs-version)
+    (exit 0))
   (create-tarballs (absolute-path (car non-option-args))
                    (absolute-path (cadr non-option-args))))
 

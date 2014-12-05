@@ -1,7 +1,16 @@
 ;; -*- scheme -*-
+
+(include "egg-tarballs-version.scm")
+
 (compile -O3 -d0 egg-tarballs.scm)
+(compile -O3 -d0 egg-tarballs-index.scm)
 
 (install-program
  'egg-tarballs
  '("egg-tarballs")
- '((version "0.5.0")))
+ `((version ,egg-tarballs-version)))
+
+(install-program
+ 'egg-tarballs-index
+ '("egg-tarballs-index")
+ `((version ,egg-tarballs-version)))
