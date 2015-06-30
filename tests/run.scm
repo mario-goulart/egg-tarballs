@@ -7,7 +7,10 @@
        (program-path))
    "egg-tarballs"))
 
-(system* "rm -rf tarballs")
+(handle-exceptions exn
+  'ignore
+  (delete-directory "tarballs" 'recursively))
+
 (system* (sprintf "~a henrietta-cache-old-format tarballs" egg-tarballs))
 
 (test-begin "egg-tarballs")
@@ -26,7 +29,10 @@
 (test-end "old cache format")
 
 
-(system* "rm -rf tarballs")
+(handle-exceptions exn
+  'ignore
+  (delete-directory "tarballs" 'recursively))
+
 (system* (sprintf "~a henrietta-cache-new-format tarballs" egg-tarballs))
 
 (test-begin "new cache format")
