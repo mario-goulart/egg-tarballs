@@ -7,6 +7,13 @@
        (program-path))
    "egg-tarballs"))
 
+(define egg-tarballs-index
+  (make-pathname
+   (if (get-environment-variable "SALMONELLA_RUNNING")
+       #f
+       (program-path))
+   "egg-tarballs-index"))
+
 (handle-exceptions exn
   'ignore
   (delete-directory "tarballs" 'recursively))
@@ -50,5 +57,30 @@
 
 
 (test-end "egg-tarballs")
+
+
+(test-begin "egg-tarballs-index")
+
+(handle-exceptions exn 'ignore (delete-file "index.scm"))
+(handle-exceptions exn 'ignore (delete-file "index-latest.scm"))
+
+(system* (sprintf "~a henrietta-cache-new-format tarballs" egg-tarballs-index))
+
+(let ((index-data (read-file "index.scm")))
+  (test "index format version"
+        "1"
+        (car index-data))
+
+  (test "egg data"
+        '(foo "1.0" (bar) (baz))
+        (let ((egg-data (cadr index-data)))
+          ;; Ignore size and sum
+          (list (list-ref egg-data 0)
+                (list-ref egg-data 1)
+                (list-ref egg-data 4)
+                (list-ref egg-data 5))))
+  )
+
+(test-end "egg-tarballs-index")
 
 (test-exit)
