@@ -68,7 +68,7 @@
 
 (let ((index-data (read-file "index.scm")))
   (test "index format version"
-        "1"
+        "2"
         (car index-data))
 
   (test "egg data"
