@@ -5,7 +5,9 @@
 
 (include "egg-tarballs-version.scm")
 
-(define index-format-version "1")
+;; v1: initial version
+;; v2: dependencies garanteed to be symbols (in v1 they could be strings)
+(define index-format-version "2")
 
 (define (warn fmt . args)
   (apply fprintf (cons (current-error-port)
@@ -36,13 +38,21 @@
 
 (define (get-egg-dependencies meta-data)
   ;; Returns (values <build depends> <test depends>)
+  (define (maybe-string->symbol obj)
+    (if (string? obj)
+        (string->symbol obj)
+        obj))
   (define (deps key)
     (or (and-let* ((d (assq key meta-data)))
           (cdr d))
         '()))
-  (values (append (deps 'depends)
-                  (deps 'needs))
-          (deps 'test-depends)))
+  ;; Some eggs (e.g., older version of the json egg) specify their
+  ;; dependencies as strings, so we need to convert them to symbols.
+  (values (map maybe-string->symbol
+               (append (deps 'depends)
+                       (deps 'needs)))
+          (map maybe-string->symbol
+               (deps 'test-depends))))
 
 (define (tarball-size/sum egg-name egg-version tarball-dir)
   (let* ((egg+version (string-append egg-name "-" egg-version))
