@@ -1,7 +1,21 @@
 (module egg-tarballs ()
 
-(import chicken scheme)
-(use files posix data-structures utils srfi-1 srfi-13 simple-sha1 extras)
+(import scheme)
+(cond-expand
+  (chicken-4
+   (import chicken)
+   (use files posix data-structures utils srfi-1 srfi-13 simple-sha1 extras))
+  (chicken-5
+   (import (chicken base)
+           (chicken file)
+           (chicken format)
+           (chicken pathname)
+           (chicken process)
+           (chicken process-context)
+           (chicken string))
+   (import simple-sha1 srfi-1 srfi-13))
+  (else
+   (error "Unsupported CHICKEN version.")))
 
 (include "egg-tarballs-version.scm")
 

@@ -1,0 +1,15 @@
+;;; egg-tarballs.egg -*- scheme -*-
+
+((synopsis "Creates tarballs for eggs in henrietta cache")
+ (author "Mario Domenech Goulart")
+ (license "BSD")
+ (category tools)
+ (dependencies simple-sha1
+               srfi-1
+               srfi-13)
+ (test-dependencies test)
+ (component-options
+  (csc-options "-O3" "-d0"))
+ (components
+  (program egg-tarballs)
+  (program egg-tarballs-index)))

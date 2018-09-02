@@ -1,7 +1,54 @@
 (module make-egg-index ()
 
-(import chicken scheme)
-(use data-structures extras files ports posix setup-api srfi-1 srfi-13)
+(import scheme)
+(cond-expand
+  (chicken-4
+   (import chicken)
+   (use data-structures extras files ports posix setup-api srfi-1 srfi-13))
+  (chicken-5
+   (import (chicken base)
+           (chicken condition)
+           (chicken errno)
+           (chicken file)
+           (chicken file posix)
+           (chicken format)
+           (chicken io)
+           (chicken irregex)
+           (chicken pathname)
+           (chicken process-context)
+           (chicken sort)
+           (chicken string))
+   (import srfi-1 srfi-13)
+
+   ;; From setup-api.scm
+   (define (version>=? v1 v2)
+     (define (version->list v)
+       (map (lambda (x) (or (string->number x) x))
+            (irregex-split "[-\\._]" (->string v))))
+     (let loop ((p1 (version->list v1))
+                (p2 (version->list v2)))
+       (cond ((null? p1) (null? p2))
+             ((null? p2))
+             ((number? (car p1))
+              (and (number? (car p2))
+                   (or (> (car p1) (car p2))
+                       (and (= (car p1) (car p2))
+                            (loop (cdr p1) (cdr p2))))))
+             ((number? (car p2)))
+             ((string>? (car p1) (car p2)))
+             (else
+              (and (string=? (car p1) (car p2))
+                   (loop (cdr p1) (cdr p2)))))))
+
+   (define (file-read-access? file)
+     (handle-exceptions exn
+       (if (= (errno) errno/noent)
+           #f
+           (abort exn))
+       (file-readable? file)))
+   )
+  (else
+   (error "Unsupported CHICKEN version.")))
 
 (include "egg-tarballs-version.scm")
 

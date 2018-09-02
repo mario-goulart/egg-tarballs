@@ -1,17 +1,30 @@
-(use test setup-api posix files utils simple-sha1)
+(cond-expand
+  (chicken-4
+   (use test setup-api posix files utils simple-sha1)
+   (define read-list read-file))
+  (chicken-5
+   (import (chicken file)
+           (chicken format)
+           (chicken io)
+           (chicken pathname)
+           (chicken process)
+           (chicken process-context))
+   (import simple-sha1 test))
+  (else
+   (error "Unsupported CHICKEN version.")))
 
 (define egg-tarballs
   (make-pathname
    (if (get-environment-variable "SALMONELLA_RUNNING")
        #f
-       (program-path))
+       (pathname-directory (car (argv))))
    "egg-tarballs"))
 
 (define egg-tarballs-index
   (make-pathname
    (if (get-environment-variable "SALMONELLA_RUNNING")
        #f
-       (program-path))
+       (pathname-directory (car (argv))))
    "egg-tarballs-index"))
 
 (handle-exceptions exn
@@ -66,7 +79,7 @@
 
 (system* (sprintf "~a henrietta-cache-new-format tarballs" egg-tarballs-index))
 
-(let ((index-data (read-file "index.scm")))
+(let ((index-data (with-input-from-file "index.scm" read-list)))
   (test "index format version"
         "2"
         (car index-data))
