@@ -8,7 +8,8 @@
            (chicken io)
            (chicken pathname)
            (chicken process)
-           (chicken process-context))
+           (chicken process-context)
+           (chicken string))
    (import simple-sha1 test))
   (else
    (error "Unsupported CHICKEN version.")))
@@ -43,8 +44,10 @@
 (test "tarballs/foo/foo-1.0.tar.gz.sha1"
       (file-exists? "tarballs/foo/foo-1.0.tar.gz.sha1"))
 
-(test (sha1sum "tarballs/foo/foo-1.0.tar.gz")
-      (with-input-from-file "tarballs/foo/foo-1.0.tar.gz.sha1" read-line))
+(test (list (sha1sum "tarballs/foo/foo-1.0.tar.gz") "foo-1.0.tar.gz")
+      (string-split
+       (with-input-from-file "tarballs/foo/foo-1.0.tar.gz.sha1" read-line)
+       "\t"))
 
 (test-end "old cache format")
 
@@ -63,8 +66,10 @@
 (test "tarballs/foo/foo-1.0.tar.gz.sha1"
       (file-exists? "tarballs/foo/foo-1.0.tar.gz.sha1"))
 
-(test (sha1sum "tarballs/foo/foo-1.0.tar.gz")
-      (with-input-from-file "tarballs/foo/foo-1.0.tar.gz.sha1" read-line))
+(test (list (sha1sum "tarballs/foo/foo-1.0.tar.gz") "foo-1.0.tar.gz")
+      (string-split
+       (with-input-from-file "tarballs/foo/foo-1.0.tar.gz.sha1" read-line)
+       "\t"))
 
 (test-end "new cache format")
 
