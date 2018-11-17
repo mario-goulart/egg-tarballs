@@ -109,7 +109,8 @@
          (sum-ok? (file-read-access? sum-file)))
     (cond ((and tarball-ok? sum-ok?)
            (values (file-size tarball)
-                   (with-input-from-file sum-file read-line)))
+                   (car (string-split
+                         (with-input-from-file sum-file read-line)))))
           (else
            (unless tarball-ok?
              (warn "could not read ~a" tarball))
