@@ -76,14 +76,19 @@
         tags-dir
         egg-dir)))
 
-(define (read-meta-file egg egg-dir)
-  (let ((meta-file (make-pathname egg-dir egg "meta")))
+(define (read-meta-file egg egg-dir chicken-version)
+  (let ((meta-file
+         (make-pathname egg-dir egg
+                        (case chicken-version
+                          ((4) "meta")
+                          ((5) "egg")
+                          (else (error "Unsupported CHICKEN version."))))))
     (and (file-read-access? meta-file)
          (handle-exceptions exn
            #f
            (with-input-from-file meta-file read)))))
 
-(define (get-egg-dependencies meta-data)
+(define (get-egg-dependencies meta-data chicken-version)
   ;; Returns (values <build depends> <test depends>)
   (define (maybe-string->symbol obj)
     (if (string? obj)
@@ -95,11 +100,20 @@
         '()))
   ;; Some eggs (e.g., older version of the json egg) specify their
   ;; dependencies as strings, so we need to convert them to symbols.
-  (values (map maybe-string->symbol
-               (append (deps 'depends)
-                       (deps 'needs)))
-          (map maybe-string->symbol
-               (deps 'test-depends))))
+  (case chicken-version
+   ((4)
+    (values (map maybe-string->symbol
+                 (append (deps 'depends)
+                         (deps 'needs)))
+            (map maybe-string->symbol
+                 (deps 'test-depends))))
+   ((5)
+    (values (map maybe-string->symbol
+                 (append (deps 'dependencies)
+                         (deps 'build-dependencies)))
+            (map maybe-string->symbol
+                 (deps 'test-dependencies))))
+   (else (error "Unsupported CHICKEN version."))))
 
 (define (tarball-size/sum egg-name egg-version tarball-dir)
   (let* ((egg+version (string-append egg-name "-" egg-version))
@@ -118,11 +132,12 @@
              (warn "could not read ~a" sum-file))
            (values #f #f)))))
 
-(define (describe-egg egg-name egg-version-dir tarball-dir)
-  (let ((meta-data (read-meta-file egg-name egg-version-dir)))
+(define (describe-egg egg-name egg-version-dir tarball-dir chicken-version)
+  (let ((meta-data (read-meta-file egg-name egg-version-dir chicken-version)))
     (if meta-data
         (let ((egg-version (pathname-strip-directory egg-version-dir)))
-          (let-values (((build-deps test-deps) (get-egg-dependencies meta-data))
+          (let-values (((build-deps test-deps)
+                        (get-egg-dependencies meta-data chicken-version))
                        ((tarball-size tarball-sum)
                         (tarball-size/sum egg-name egg-version tarball-dir)))
             (when (and tarball-size tarball-sum)
@@ -137,7 +152,7 @@
               egg-name
               egg-version-dir))))
 
-(define (make-egg-index henrietta-cache-dir tarballs-dir out-dir latest-only?)
+(define (make-egg-index henrietta-cache-dir tarballs-dir out-dir latest-only? chicken-version)
   (create-directory out-dir 'recursively)
   (let ((out-file (make-pathname out-dir
                                  (if latest-only?
@@ -156,19 +171,30 @@
                  (let ((latest (and (not (null? versions))
                                     (car (sort versions version>=?)))))
                    (and latest
-                        (describe-egg egg-name latest tarball-dir)))
-                 (for-each (lambda (egg-version-dir)
-                             (describe-egg egg-name egg-version-dir tarball-dir))
-                           versions))))
+                        (describe-egg egg-name latest tarball-dir chicken-version)))
+                 (for-each
+                  (lambda (egg-version-dir)
+                    (describe-egg egg-name egg-version-dir tarball-dir chicken-version))
+                  versions))))
          (glob (make-pathname henrietta-cache-dir "*")))))))
 
 (define (usage #!optional exit-code)
   (let ((port (if (and exit-code (not (zero? exit-code)))
                   (current-error-port)
                   (current-output-port))))
-    (fprintf port "Usage: ~a [-version] [-O|-out-dir <out dir>] <henrietta cache dir> <tarballs dir>
+    (fprintf port "Usage: ~a <mandatory params> <optional params> <henrietta cache dir> <tarballs dir>
 
-If <out dir> is not provided, files are written to the current directory.
+Mandatory parameters:
+-chicken-version <chicken version>
+ CHICKEN major version to consider.
+
+Optional parameters:
+-O|-out-dir <out dir>
+  Output directory.  If not provided, files are written to the current
+  directory.
+
+-version:
+  Show the program version and exit.
 
 This program must be run _after_ egg-tarballs, since it needs
 information from tarballs and sum files.
@@ -178,7 +204,8 @@ information from tarballs and sum files.
 
 (let ((henrietta-cache-dir #f)
       (tarballs-dir #f)
-      (out-dir #f))
+      (out-dir #f)
+      (chicken-version #f))
   (let loop ((args (command-line-arguments)))
     (cond ((and (null? args)
                 (or (not henrietta-cache-dir)
@@ -186,8 +213,10 @@ information from tarballs and sum files.
            (usage 1))
           ((null? args)
            (let ((out-dir (or out-dir ".")))
-             (make-egg-index henrietta-cache-dir tarballs-dir out-dir #f)
-             (make-egg-index henrietta-cache-dir tarballs-dir out-dir #t)))
+             (unless chicken-version
+               (die "-chicken-version is a mandatory parameter."))
+             (make-egg-index henrietta-cache-dir tarballs-dir out-dir #f chicken-version)
+             (make-egg-index henrietta-cache-dir tarballs-dir out-dir #t chicken-version)))
           (else
            (let ((arg (car args)))
              (cond ((or (string=? arg "-h")
@@ -202,6 +231,14 @@ information from tarballs and sum files.
                     (if (null? (cdr args))
                         (die "-out-dir (-O) requires an argument.")
                         (set! out-dir (cadr args)))
+                    (loop (cddr args)))
+                   ((string=? arg "-chicken-version")
+                    (if (null? (cdr args))
+                        (die "-chicken-version requires an argument.")
+                        (let ((v (string->number (cadr args))))
+                          (unless v
+                            (die "The argument for -chicken-version must be a positive integer."))
+                          (set! chicken-version v)))
                     (loop (cddr args)))
                    ((and (not (string-prefix? "-" arg))
                          (not henrietta-cache-dir))

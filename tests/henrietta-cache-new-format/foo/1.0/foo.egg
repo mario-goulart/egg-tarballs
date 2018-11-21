@@ -1,0 +1,3 @@
+;; -*- scheme -*-
+((dependencies bar)
+ (test-dependencies baz))

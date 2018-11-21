@@ -79,25 +79,32 @@
 
 (test-begin "egg-tarballs-index")
 
-(handle-exceptions exn 'ignore (delete-file "index.scm"))
-(handle-exceptions exn 'ignore (delete-file "index-latest.scm"))
+(for-each
+ (lambda (chicken-version)
+   (test-begin (sprintf "egg-tarballs-index for CHICKEN ~a eggs"
+                        chicken-version))
+   (handle-exceptions exn 'ignore (delete-file "index.scm"))
+   (handle-exceptions exn 'ignore (delete-file "index-latest.scm"))
 
-(system* (sprintf "~a henrietta-cache-new-format tarballs" egg-tarballs-index))
+   (system* (sprintf "~a -chicken-version 4 henrietta-cache-new-format tarballs"
+                     egg-tarballs-index))
 
-(let ((index-data (with-input-from-file "index.scm" read-list)))
-  (test "index format version"
-        "2"
-        (car index-data))
+   (let ((index-data (with-input-from-file "index.scm" read-list)))
+     (test "index format version"
+           "2"
+           (car index-data))
 
-  (test "egg data"
-        '(foo "1.0" (bar) (baz))
-        (let ((egg-data (cadr index-data)))
-          ;; Ignore size and sum
-          (list (list-ref egg-data 0)
-                (list-ref egg-data 1)
-                (list-ref egg-data 4)
-                (list-ref egg-data 5))))
-  )
+     (test "egg data"
+           '(foo "1.0" (bar) (baz))
+           (let ((egg-data (cadr index-data)))
+             ;; Ignore size and sum
+             (list (list-ref egg-data 0)
+                   (list-ref egg-data 1)
+                   (list-ref egg-data 4)
+                   (list-ref egg-data 5)))))
+   (test-end (sprintf "egg-tarballs-index for CHICKEN ~a eggs"
+                      chicken-version)))
+ '(4 5))
 
 (test-end "egg-tarballs-index")
 
