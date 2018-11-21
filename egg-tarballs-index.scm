@@ -15,6 +15,7 @@
            (chicken io)
            (chicken irregex)
            (chicken pathname)
+           (chicken port)
            (chicken process-context)
            (chicken sort)
            (chicken string))
@@ -182,11 +183,17 @@
   (let ((port (if (and exit-code (not (zero? exit-code)))
                   (current-error-port)
                   (current-output-port))))
-    (fprintf port "Usage: ~a <mandatory params> <optional params> <henrietta cache dir> <tarballs dir>
+    (fprintf port "Usage: ~a <optional parameters> <mandatory parameters>
 
 Mandatory parameters:
 -chicken-version <chicken version>
  CHICKEN major version to consider.
+
+-henrietta-cache-dir
+ Path to the henrietta cache directory.
+
+-tarballs-dir
+ Path to the tarballs directory.
 
 Optional parameters:
 -O|-out-dir <out dir>
@@ -215,6 +222,10 @@ information from tarballs and sum files.
            (let ((out-dir (or out-dir ".")))
              (unless chicken-version
                (die "-chicken-version is a mandatory parameter."))
+             (unless henrietta-cache-dir
+               (die "-henrietta-cache-dir is a mandatory parameter."))
+             (unless tarballs-dir
+               (die "-tarballs-dir is a mandatory parameter."))
              (make-egg-index henrietta-cache-dir tarballs-dir out-dir #f chicken-version)
              (make-egg-index henrietta-cache-dir tarballs-dir out-dir #t chicken-version)))
           (else
@@ -240,16 +251,21 @@ information from tarballs and sum files.
                             (die "The argument for -chicken-version must be a positive integer."))
                           (set! chicken-version v)))
                     (loop (cddr args)))
-                   ((and (not (string-prefix? "-" arg))
-                         (not henrietta-cache-dir))
-                    (set! henrietta-cache-dir arg)
-                    (loop (cdr args)))
-                   ((and (not (string-prefix? "-" arg))
-                         henrietta-cache-dir
-                         (not tarballs-dir))
-                    (set! tarballs-dir arg)
-                    (loop (cdr args)))
+                   ((string=? arg "-henrietta-cache-dir")
+                    (if (null? (cdr args))
+                        (die "-henrietta-cache-dir requires an argument.")
+                        (set! henrietta-cache-dir (cadr args)))
+                    (loop (cddr args)))
+                   ((string=? arg "-tarballs-dir")
+                    (if (null? (cdr args))
+                        (die "-tarballs-dir requires an argument.")
+                        (set! tarballs-dir (cadr args)))
+                    (loop (cddr args)))
                    (else
+                    (with-output-to-port (current-error-port)
+                      (lambda ()
+                        (printf "Invalid option: ~a\n"
+                                arg)))
                     (usage 1))))))))
 
 ) ;; end module

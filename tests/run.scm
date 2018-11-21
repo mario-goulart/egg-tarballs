@@ -86,8 +86,10 @@
    (handle-exceptions exn 'ignore (delete-file "index.scm"))
    (handle-exceptions exn 'ignore (delete-file "index-latest.scm"))
 
-   (system* (sprintf "~a -chicken-version 4 henrietta-cache-new-format tarballs"
-                     egg-tarballs-index))
+   (system*
+    (sprintf
+     "~a -chicken-version ~a -henrietta-cache-dir henrietta-cache-new-format -tarballs-dir tarballs"
+                     egg-tarballs-index chicken-version))
 
    (let ((index-data (with-input-from-file "index.scm" read-list)))
      (test "index format version"
