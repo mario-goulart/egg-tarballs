@@ -43,10 +43,9 @@
 
 (define (create-egg-tarball egg-name egg-version-dir tarballs-dir)
   (let* ((egg-tarball-dir (make-pathname tarballs-dir egg-name))
-         (egg-version-tarball-dir
-          (sprintf "~a-~a"
-                   egg-name
-                   (pathname-strip-directory egg-version-dir)))
+         (version (pathname-strip-directory egg-version-dir))
+         (egg-version-tarball-dir (sprintf "~a-~a" egg-name version))
+         (version-file (make-pathname egg-version-dir "VERSION"))
          (tar-file (make-pathname #f egg-version-tarball-dir "tar"))
          (gzip-file (make-pathname #f tar-file "gz"))
          (sum-file (make-pathname (list tarballs-dir egg-name) gzip-file "sha1")))
@@ -55,6 +54,7 @@
         (begin
           (printf "Creating tarball for ~a\n" egg-version-tarball-dir)
           (create-directory  egg-tarball-dir 'with-parents)
+          (with-output-to-file version-file (cut display version))
           (run ,cp ,cp-options
                ,egg-version-dir
                ,(make-pathname egg-tarball-dir egg-version-tarball-dir))

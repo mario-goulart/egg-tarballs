@@ -34,6 +34,15 @@
 
 (system* (sprintf "~a henrietta-cache-old-format tarballs" egg-tarballs))
 
+(define (check-version-file)
+  (test "Checking the VERSION file"
+        "1.0"
+        (begin
+          (system* "tar --extract --gzip --file=tarballs/foo/foo-1.0.tar.gz foo-1.0/VERSION")
+          (let ((version (with-input-from-file "foo-1.0/VERSION" read-string)))
+            (delete-directory "foo-1.0" 'recursively)
+            version))))
+
 (test-begin "egg-tarballs")
 
 (test-begin "old cache format")
@@ -48,6 +57,8 @@
       (string-split
        (with-input-from-file "tarballs/foo/foo-1.0.tar.gz.sha1" read-line)
        "\t"))
+
+(check-version-file)
 
 (test-end "old cache format")
 
@@ -70,6 +81,8 @@
       (string-split
        (with-input-from-file "tarballs/foo/foo-1.0.tar.gz.sha1" read-line)
        "\t"))
+
+(check-version-file)
 
 (test-end "new cache format")
 
