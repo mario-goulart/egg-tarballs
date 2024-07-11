@@ -82,7 +82,7 @@
          (make-pathname egg-dir egg
                         (case chicken-version
                           ((4) "meta")
-                          ((5) "egg")
+                          ((5 6) "egg")
                           (else (error "Unsupported CHICKEN version."))))))
     (and (file-read-access? meta-file)
          (handle-exceptions exn
@@ -108,7 +108,7 @@
                          (deps 'needs)))
             (map maybe-string->symbol
                  (deps 'test-depends))))
-   ((5)
+   ((5 6)
     (values (map maybe-string->symbol
                  (append (deps 'dependencies)
                          (deps 'build-dependencies)))
