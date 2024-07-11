@@ -5,7 +5,7 @@
   (chicken-4
    (import chicken)
    (use files posix data-structures utils srfi-1 srfi-13 simple-sha1 extras))
-  (chicken-5
+  ((or chicken-5 chicken-6)
    (import (chicken base)
            (chicken file)
            (chicken format)

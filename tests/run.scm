@@ -2,7 +2,7 @@
   (chicken-4
    (use test setup-api posix files utils simple-sha1)
    (define read-list read-file))
-  (chicken-5
+  ((or chicken-5 chicken-6)
    (import (chicken file)
            (chicken format)
            (chicken io)
