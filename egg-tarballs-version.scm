@@ -1,1 +1,1 @@
-(define egg-tarballs-version "0.10.0")
+(define egg-tarballs-version "1.0.1")
