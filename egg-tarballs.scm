@@ -19,10 +19,26 @@
 
 (include "egg-tarballs-version.scm")
 
+;; Following the recommendations from
+;; https://www.gnu.org/software/tar/manual/html_node/Reproducibility.html
+;; for creating reproducible tarballs
 (define tar "tar")
-(define tar-options "cf")
+(define tar-options "\
+  --create \
+  --sort=name \
+  --format=posix \
+  --pax-option=exthdr.name=%d/PaxHeaders/%f \
+  --pax-option=delete=atime,delete=ctime \
+  --clamp-mtime \
+  --mtime 1970-01-01 \
+  --numeric-owner \
+  --owner=0 \
+  --group=0 \
+  --mode=go+u,go-w \
+  --file \
+")
 (define gzip "gzip")
-(define gzip-options "-9")
+(define gzip-options "--no-name -9")
 (define cp "cp")
 (define cp-options "-R")
 (define rm "rm")
@@ -36,7 +52,7 @@
 (define-syntax run
   (syntax-rules ()
     ((_ . exprs)
-     (let ((cmd (concat `exprs)))
+     (let ((cmd (string-append "LC_ALL=C " (concat `exprs))))
        (when *verbose*
          (print cmd))
        (system* cmd)))))
