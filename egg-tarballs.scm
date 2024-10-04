@@ -108,11 +108,19 @@
       (normalize-pathname (make-pathname (current-directory) path))))
 
 (define (usage #!optional exit-code)
-  (let ((port (if (and exit-code (not (zero? exit-code)))
-                  (current-error-port)
-                  (current-output-port))))
-    (fprintf port "Usage: ~a [-verbose] [-version] <henrietta cache dir> <tarballs dir>\n"
-             (pathname-strip-directory (program-name))))
+  (let* ((port (if (and exit-code (not (zero? exit-code)))
+                   (current-error-port)
+                   (current-output-port)))
+         (prog (pathname-strip-directory (program-name)))
+         (msg #<#EOF
+Usage: #prog [-verbose] [-version] <henrietta-cache-dir> <tarballs-dir>
+
+Create tarball files under <tarballs-dir>, using egg source files from
+<henrietta-cache-dir>.
+
+EOF
+))
+    (fprintf port msg))
   (when exit-code (exit exit-code)))
 
 (let* ((args (command-line-arguments))

@@ -183,25 +183,27 @@
   (let ((port (if (and exit-code (not (zero? exit-code)))
                   (current-error-port)
                   (current-output-port))))
-    (fprintf port "Usage: ~a <optional parameters> <mandatory parameters>
+    (fprintf port "Usage: ~a <optional-parameters> <required-parameters>
 
-Mandatory parameters:
--chicken-version <chicken version>
- CHICKEN major version to consider.
+Create index.scm and index-latest.scm files with metadata about eggs.
 
--henrietta-cache-dir
- Path to the henrietta cache directory.
+<required-parameters>:
+  -chicken-version <chicken version>
+   CHICKEN major version to consider.
 
--tarballs-dir
- Path to the tarballs directory.
+  -henrietta-cache-dir
+   Path to the henrietta cache directory.
 
-Optional parameters:
--O|-out-dir <out dir>
-  Output directory.  If not provided, files are written to the current
-  directory.
+  -tarballs-dir
+   Path to the tarballs directory.
 
--version:
-  Show the program version and exit.
+<optional-parameters>:
+  -O|-out-dir <out dir>
+    Output directory.  If not provided, files are written to the current
+    directory.
+
+  -version:
+    Show the program version and exit.
 
 This program must be run _after_ egg-tarballs, since it needs
 information from tarballs and sum files.
