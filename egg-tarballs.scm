@@ -79,7 +79,7 @@
           (run ,gzip ,gzip-options ,tar-file)
           (with-output-to-file sum-file
             (lambda ()
-              (print (sha1sum gzip-file) "\t" gzip-file)))
+              (print (sha1sum gzip-file) "  " gzip-file)))
           (run ,rm ,rm-options ,tar-file ,egg-version-tarball-dir)))))
 
 (define (egg-versions-dir egg-dir)

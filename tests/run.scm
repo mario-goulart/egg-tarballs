@@ -47,7 +47,7 @@
 (test (list (sha1sum "tarballs/foo/foo-1.0.tar.gz") "foo-1.0.tar.gz")
       (string-split
        (with-input-from-file "tarballs/foo/foo-1.0.tar.gz.sha1" read-line)
-       "\t"))
+       "  "))
 
 (test-end "old cache format")
 
@@ -69,7 +69,7 @@
 (test (list (sha1sum "tarballs/foo/foo-1.0.tar.gz") "foo-1.0.tar.gz")
       (string-split
        (with-input-from-file "tarballs/foo/foo-1.0.tar.gz.sha1" read-line)
-       "\t"))
+       "  "))
 
 (test-end "new cache format")
 
