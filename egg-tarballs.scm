@@ -30,7 +30,7 @@
   --pax-option=exthdr.name=%d/PaxHeaders/%f \
   --pax-option=delete=atime,delete=ctime \
   --clamp-mtime \
-  --mtime 1970-01-01 \
+  --mtime 2000-07-20 \
   --numeric-owner \
   --owner=0 \
   --group=0 \
