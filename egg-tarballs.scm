@@ -72,15 +72,15 @@
           (printf "Creating tarball for ~a\n" egg-version-tarball-dir)
           (create-directory  egg-tarball-dir 'with-parents)
           (run ,cp ,cp-options
-               ,egg-version-dir
-               ,(make-pathname egg-tarball-dir egg-version-tarball-dir))
+               ,(qs egg-version-dir)
+               ,(qs (make-pathname egg-tarball-dir egg-version-tarball-dir)))
           (change-directory egg-tarball-dir)
-          (run ,tar ,tar-options ,tar-file ,egg-version-tarball-dir)
-          (run ,gzip ,gzip-options ,tar-file)
+          (run ,tar ,tar-options ,(qs tar-file) ,(qs egg-version-tarball-dir))
+          (run ,gzip ,gzip-options ,(qs tar-file))
           (with-output-to-file sum-file
             (lambda ()
               (print (sha1sum gzip-file) "  " gzip-file)))
-          (run ,rm ,rm-options ,tar-file ,egg-version-tarball-dir)))))
+          (run ,rm ,rm-options ,(qs tar-file) ,(qs egg-version-tarball-dir))))))
 
 (define (egg-versions-dir egg-dir)
   (let ((tags-dir (make-pathname egg-dir "tags")))
